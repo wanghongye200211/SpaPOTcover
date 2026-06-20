@@ -4,7 +4,7 @@
   Fields that are designed for later updates:
   - preview: static figure preview shown in the figure browser
   - gif: animated GIF shown in the dynamic preview section; use "" to keep a placeholder
-  - frames: extracted PNG frames for interactive playback; update the frame sequence after replacing GIFs
+  - frames: extracted PNG frames for interactive playback; rerun tools/extract_gif_frames.py after replacing GIFs
   - pdf: final PDF path; use "" if the final PDF is not ready
   - evidence: short claim-oriented phrases shown in the evidence matrix
   - animation: GIF-specific metadata shown next to animated panels
@@ -39,14 +39,14 @@ window.SpaPOT_FIGURES = {
       "The simulation benchmark demonstrates whether the model can recover continuous trajectories, cell-type proportions, potential fields, and critical scores in a controlled system.",
     preview: "assets/figure2_preview.png",
     gif: "assets/gifs/figure2_simulation.gif",
-    frames: { base: "assets/frames/figure2/frame_", count: 41, delayMs: 220 },
+    frames: { base: "assets/frames/figure2/frame_", count: 41, delayMs: 220, start: 0, end: 4, step: 0.1 },
     pdf: "assets/pdfs/figure2.pdf",
     alt: "Figure 2 simulation benchmark preview",
     evidence: ["controlled trajectory recovery", "potential-field validation", "critical-score behavior"],
     animation: [
       { label: "Temporal scale", value: "synthetic t=0 to t=4" },
       { label: "Animated views", value: "pitchfork and heart-to-duck" },
-      { label: "Frame step", value: "0.1 synthetic time" },
+      { label: "Frame step", value: "0.1 and 0.02 synthetic time" },
     ],
     timeLabel: "Simulation time",
     timepoints: ["t=0", "t=1", "t=2", "t=3", "t=4"],
@@ -61,17 +61,17 @@ window.SpaPOT_FIGURES = {
       "Mouse dorsal midbrain is the main real-data case, linking spatial alignment, generated trajectories, potential landscapes, critical metrics, lineage shifts, and gene perturbation.",
     preview: "assets/figure3_preview.png",
     gif: "assets/gifs/figure3_mouse_midbrain.gif",
-    frames: { base: "assets/frames/figure3/frame_", count: 41, delayMs: 220 },
+    frames: { base: "assets/frames/figure3/frame_", count: 81, delayMs: 220, start: 12.5, end: 16.5, step: 0.05 },
     pdf: "assets/pdfs/figure3.pdf",
     alt: "Figure 3 mouse dorsal midbrain preview",
     evidence: ["main real-data reconstruction", "critical windows", "lineage and perturbation signals"],
     animation: [
       { label: "Temporal scale", value: "E12.5 to E16.5" },
-      { label: "Animated view", value: "all-predicted states" },
-      { label: "Frame step", value: "0.1 embryonic day" },
+      { label: "Animated view", value: "continuous hybrid rollout from E12.5" },
+      { label: "Frame step", value: "0.05 embryonic day" },
     ],
     timeLabel: "Embryonic time",
-    timepoints: ["E12.5", "E13.0", "E13.5", "E14.0", "E14.5", "E15.0", "E15.5", "E16.5"],
+    timepoints: ["E12.5", "E13.0", "E13.5", "E14.0", "E14.5", "E15.0", "E15.5", "E16.0", "E16.5"],
   },
   figure4: {
     kicker: "Figure 4",
@@ -83,14 +83,14 @@ window.SpaPOT_FIGURES = {
       "The zebrafish dataset is used to show time-point generation, branch criticality, lineage transition, and functional enrichment.",
     preview: "assets/figure4_preview.png",
     gif: "assets/gifs/figure4_zebrafish.gif",
-    frames: { base: "assets/frames/figure4/frame_", count: 81, delayMs: 220 },
+    frames: { base: "assets/frames/figure4/frame_", count: 81, delayMs: 220, start: 10, end: 18, step: 0.1 },
     pdf: "assets/pdfs/figure4.pdf",
     alt: "Figure 4 zebrafish developmental dynamics preview",
     evidence: ["cross-system generation", "branch criticality", "terminal fate interpretation"],
     animation: [
       { label: "Temporal scale", value: "10 hpf to 18 hpf" },
       { label: "Animated view", value: "ZESTA annotations" },
-      { label: "Frame step", value: "0.1 hpf display grid" },
+      { label: "Frame step", value: "0.1 hpf model frames" },
     ],
     timeLabel: "Developmental time",
     timepoints: ["10 hpf", "12 hpf", "14 hpf", "15 hpf", "16 hpf", "18 hpf"],
@@ -105,7 +105,7 @@ window.SpaPOT_FIGURES = {
       "The axolotl brain injury-response dataset is used to show spatial alignment, generated slices, critical scores, EGC-family gene programs, and potential-associated expression trends.",
     preview: "assets/figure5_preview.png",
     gif: "assets/gifs/figure5_axolotl.gif",
-    frames: { base: "assets/frames/figure5/frame_", count: 181, delayMs: 220 },
+    frames: { base: "assets/frames/figure5/frame_", count: 181, delayMs: 220, start: 2, end: 20, step: 0.1 },
     pdf: "assets/pdfs/figure5.pdf",
     alt: "Figure 5 axolotl brain injury-response dynamics preview",
     evidence: ["injury-response trajectory", "EGC-family programs", "potential-linked expression"],
@@ -145,7 +145,7 @@ window.SpaPOT_MOTION_PANELS = {
     role: "Simulation 1",
     preview: "assets/figure2_preview.png",
     gif: "assets/gifs/figure2_simulation.gif",
-    frames: { base: "assets/frames/figure2/frame_", count: 41, delayMs: 220 },
+    frames: { base: "assets/frames/figure2/frame_", count: 41, delayMs: 220, start: 0, end: 4, step: 0.1 },
     alt: "Pitchfork simulation trajectory",
     animation: [
       { label: "Source model", value: "hybrid GeneW10 run" },
@@ -163,11 +163,11 @@ window.SpaPOT_MOTION_PANELS = {
     role: "Simulation 2",
     preview: "assets/figure2_preview.png",
     gif: "assets/gifs/figure2_heart2duck.gif",
-    frames: { base: "assets/frames/figure2_heart2duck/frame_", count: 11, delayMs: 260 },
+    frames: { base: "assets/frames/figure2_heart2duck/frame_", count: 51, delayMs: 220, start: 0, end: 1, step: 0.02 },
     alt: "Heart-to-duck simulation trajectory",
     animation: [
       { label: "Source model", value: "gene-potential z-gradient run" },
-      { label: "Frame step", value: "0.1 synthetic time" },
+      { label: "Frame step", value: "0.02 synthetic time" },
       { label: "Label source", value: "fixed heart2duck classifier" },
     ],
     timeLabel: "Simulation time",

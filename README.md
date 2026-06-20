@@ -1,6 +1,6 @@
-# SpaPOT Cover
+# SpaPOT Results Frontend
 
-This repository contains a standalone static English-only results summary page for the SpaPOT / stVCR project.
+This folder contains a static English-only results summary page for the SpaPOT / stVCR project.
 
 Open `index.html` in a browser to view the page. The page is organized around the current six-figure manuscript structure:
 
@@ -48,18 +48,32 @@ assets/pdfs/
 
 After replacing a file, update the matching path in `figure-config.js`. The HTML and JavaScript do not need to change unless the page structure itself changes.
 
-## Interactive Motion Panels
+## Regenerate Interactive GIF Frames
 
-The page does not rely on browser-native GIF playback for interaction. Each motion panel uses pre-extracted PNG frames under `assets/frames/`, which lets the frontend player provide play, pause, speed, and seek controls.
+The page does not rely on browser-native GIF playback for interaction. Instead, each GIF is extracted into PNG frames and the frontend player controls those frames with play, pause, speed, and seek controls.
 
-If a GIF is replaced later, replace the matching frame sequence under `assets/frames/` and update the matching `frames.count` and `frames.delayMs` values in `figure-config.js`.
+The current motion assets are standardized by:
+
+```bash
+/opt/anaconda3/envs/OT_physics/bin/python results_frontend/tools/build_standard_motion_assets.py
+```
+
+This script writes the frontend GIFs, frame folders, and `assets/motion_manifest.json`. The standardized layout places the dataset/model label in the upper left, the time marker in the upper right, the label source in the lower left, and the frame step in the lower left footer. Figure 2 has two simulation panels: pitchfork and heart-to-duck.
+
+After replacing any GIF, regenerate the frame folders:
+
+```bash
+/Users/wanghongye/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 results_frontend/tools/extract_gif_frames.py
+```
+
+Then update the matching `frames.count` and `frames.delayMs` values in `figure-config.js` if the script reports different values.
 
 ## Language Rule
 
 All visible frontend text should remain in English. Before sharing the page, run:
 
 ```bash
-rg -n "[\p{Han}]" . -g '!*.pdf'
+rg -n "[\p{Han}]" results_frontend -g '!*.pdf'
 ```
 
 No output means there is no Chinese text in the source files, excluding binary PDF files.

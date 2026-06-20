@@ -1,5 +1,6 @@
 const figureData = window.SpaPOT_FIGURES || {};
 const motionPanelData = window.SpaPOT_MOTION_PANELS || {};
+const motionStats = window.SpaPOT_MOTION_STATS || {};
 const motionData = { ...figureData, ...motionPanelData };
 const figureKeys = Object.keys(figureData);
 const simulationMotionKeys = ["simPitchfork", "simHeart2Duck"].filter((key) => motionData[key]);
@@ -41,14 +42,47 @@ function scrollToHashTarget() {
   if (target) target.scrollIntoView({ block: "start" });
 }
 
-function buildTimeMeta(data) {
+function getFrameIndexForTimepoint(data, point, pointIndex) {
+  const frames = data.frames || {};
+  const totalFrames = Math.max(1, Number(frames.count) || 1);
+  if (totalFrames <= 1) return 0;
+
+  const numericValue = Number(String(point).match(/-?\d+(?:\.\d+)?/)?.[0]);
+  if (Number.isFinite(numericValue) && Number.isFinite(frames.start) && Number.isFinite(frames.end)) {
+    const progress = (numericValue - Number(frames.start)) / Math.max(Number(frames.end) - Number(frames.start), 1e-9);
+    return Math.max(0, Math.min(totalFrames - 1, Math.round(progress * (totalFrames - 1))));
+  }
+
+  const labels = data.timepoints || [];
+  if (labels.length <= 1) return 0;
+  return Math.round((pointIndex / (labels.length - 1)) * (totalFrames - 1));
+}
+
+function buildTimeMeta(data, figureKey = "") {
   const points = data.timepoints || [];
   if (!points.length) return "";
+  const interactive = Boolean(figureKey && hasInteractiveFrames(data));
 
   return `
     <p class="time-label">${data.timeLabel || "Time axis"}</p>
     <div class="time-chips">
-      ${points.map((point) => `<span>${point}</span>`).join("")}
+      ${points
+        .map((point, index) => {
+          if (!interactive) return `<span>${point}</span>`;
+          const frameIndex = getFrameIndexForTimepoint(data, point, index);
+          return `
+            <button
+              class="time-chip-button"
+              type="button"
+              data-time-control-for="${figureKey}"
+              data-frame-jump="${frameIndex}"
+              aria-pressed="false"
+            >
+              ${point}
+            </button>
+          `;
+        })
+        .join("")}
     </div>
   `;
 }
@@ -125,9 +159,98 @@ function getFrameLabel(data, frameIndex) {
   const labels = data.timepoints || [];
   if (!labels.length) return `Frame ${frameIndex + 1}`;
 
+  if (Number.isFinite(frames.start) && Number.isFinite(frames.end)) {
+    const progress = totalFrames === 1 ? 0 : frameIndex / (totalFrames - 1);
+    const value = Number(frames.start) + progress * (Number(frames.end) - Number(frames.start));
+    const nearest = labels.reduce(
+      (best, label, index) => {
+        const numericValue = Number(String(label).match(/-?\d+(?:\.\d+)?/)?.[0]);
+        if (!Number.isFinite(numericValue)) return best;
+        const distance = Math.abs(numericValue - value);
+        return distance < best.distance ? { index, distance } : best;
+      },
+      { index: 0, distance: Number.POSITIVE_INFINITY },
+    );
+    if (Number.isFinite(nearest.distance)) return labels[nearest.index];
+  }
+
   const labelIndex =
     totalFrames === 1 ? 0 : Math.round((frameIndex / (totalFrames - 1)) * (labels.length - 1));
   return labels[Math.max(0, Math.min(labels.length - 1, labelIndex))];
+}
+
+function getStatsFrame(figureKey, frameIndex) {
+  const stats = motionStats[figureKey];
+  if (!stats?.frames?.length) return null;
+  const frames = stats.frames;
+  const index = Math.max(0, Math.min(frames.length - 1, Math.round(frameIndex)));
+  return frames[index];
+}
+
+function getCellTypeRows(figureKey, frameIndex) {
+  const stats = motionStats[figureKey];
+  if (!stats) return [];
+  const frame = getStatsFrame(figureKey, frameIndex);
+  const counts = frame?.counts || {};
+  return (stats.palette || []).map((item) => ({
+    label: item.label,
+    color: item.color || "#64748b",
+    count: Number.isFinite(Number(counts[item.label])) ? Number(counts[item.label]) : null,
+  }));
+}
+
+function buildCellTypeRows(figureKey, frameIndex) {
+  const rows = getCellTypeRows(figureKey, frameIndex);
+  if (!rows.length) {
+    return `<p class="celltype-empty">Cell-type statistics pending.</p>`;
+  }
+  const maxCount = Math.max(1, ...rows.map((row) => row.count || 0));
+  return rows
+    .map((row) => {
+      const width = row.count === null ? 0 : Math.max(5, Math.round((row.count / maxCount) * 100));
+      return `
+        <div class="celltype-row">
+          <span class="celltype-swatch" style="--celltype-color: ${row.color}"></span>
+          <span class="celltype-name">${row.label}</span>
+          <strong class="celltype-count">${row.count === null ? "—" : row.count.toLocaleString()}</strong>
+          <span class="celltype-bar" aria-hidden="true">
+            <span style="width: ${width}%; background: ${row.color}"></span>
+          </span>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function buildCellTypePanel(figureKey, frameIndex = 0) {
+  const stats = motionStats[figureKey];
+  if (!stats) return "";
+  const frame = getStatsFrame(figureKey, frameIndex);
+  const total = Number.isFinite(Number(frame?.total)) ? Number(frame.total).toLocaleString() : "—";
+  return `
+    <aside class="celltype-panel" data-celltype-panel aria-label="${stats.title || "Cell types"}">
+      <div class="celltype-head">
+        <span>${stats.title || "Cell types"}</span>
+        <strong data-celltype-total>n = ${total}</strong>
+      </div>
+      <p data-celltype-caption>${stats.countLabel || "current frame"}</p>
+      <div class="celltype-list" data-celltype-list>
+        ${buildCellTypeRows(figureKey, frameIndex)}
+      </div>
+    </aside>
+  `;
+}
+
+function updateCellTypePanel(root, figureKey, frameIndex) {
+  const stats = motionStats[figureKey];
+  const panel = root.querySelector("[data-celltype-panel]");
+  if (!stats || !panel) return;
+  const frame = getStatsFrame(figureKey, frameIndex);
+  const total = Number.isFinite(Number(frame?.total)) ? Number(frame.total).toLocaleString() : "—";
+  const totalNode = panel.querySelector("[data-celltype-total]");
+  const listNode = panel.querySelector("[data-celltype-list]");
+  if (totalNode) totalNode.textContent = `n = ${total}`;
+  if (listNode) listNode.innerHTML = buildCellTypeRows(figureKey, frameIndex);
 }
 
 function buildMotionPreview(data, figureKey) {
@@ -139,7 +262,12 @@ function buildMotionPreview(data, figureKey) {
         <span>Motion preview</span>
         <strong>${data.timeLabel || "Animated trajectory"}</strong>
       </div>
-      <img src="${data.gif}" alt="${data.alt || `${data.kicker} animated trajectory`}" />
+      <div class="motion-content-grid">
+        <div class="motion-main">
+          <img src="${data.gif}" alt="${data.alt || `${data.kicker} animated trajectory`}" />
+        </div>
+        ${buildCellTypePanel(figureKey)}
+      </div>
     `;
   }
 
@@ -159,32 +287,37 @@ function buildMotionPreview(data, figureKey) {
         <span>Interactive motion</span>
         <strong>${data.timeLabel || "Animated trajectory"}</strong>
       </div>
-      <div class="motion-stage">
-        <img data-frame-image src="${firstFrame}" alt="${data.alt || `${data.kicker} animated trajectory frame`}" />
+      <div class="motion-content-grid">
+        <div class="motion-main">
+          <div class="motion-stage">
+            <img data-frame-image src="${firstFrame}" alt="${data.alt || `${data.kicker} animated trajectory frame`}" />
+          </div>
+          <div class="motion-controls">
+            <button class="motion-control motion-play" type="button" data-play aria-label="Play ${data.kicker} animation">Play</button>
+            <input
+              class="motion-range"
+              type="range"
+              min="0"
+              max="${frameCount - 1}"
+              step="1"
+              value="0"
+              data-range
+              aria-label="${data.kicker} animation frame"
+            />
+            <button class="motion-control motion-speed" type="button" data-speed aria-label="Toggle ${data.kicker} animation speed">1x</button>
+          </div>
+          <div class="motion-status" aria-live="polite">
+            <span data-frame-counter>Frame 1/${frameCount}</span>
+            <strong data-frame-label>${firstLabel}</strong>
+          </div>
+          ${
+            data.gif
+              ? `<a class="motion-raw-link" href="${data.gif}" aria-label="Open original ${data.kicker} GIF">Open original GIF</a>`
+              : ""
+          }
+        </div>
+        ${buildCellTypePanel(figureKey)}
       </div>
-      <div class="motion-controls">
-        <button class="motion-control motion-play" type="button" data-play aria-label="Play ${data.kicker} animation">Play</button>
-        <input
-          class="motion-range"
-          type="range"
-          min="0"
-          max="${frameCount - 1}"
-          step="1"
-          value="0"
-          data-range
-          aria-label="${data.kicker} animation frame"
-        />
-        <button class="motion-control motion-speed" type="button" data-speed aria-label="Toggle ${data.kicker} animation speed">1x</button>
-      </div>
-      <div class="motion-status" aria-live="polite">
-        <span data-frame-counter>Frame 1/${frameCount}</span>
-        <strong data-frame-label>${firstLabel}</strong>
-      </div>
-      ${
-        data.gif
-          ? `<a class="motion-raw-link" href="${data.gif}" aria-label="Open original ${data.kicker} GIF">Open original GIF</a>`
-          : ""
-      }
     </div>
   `;
 }
@@ -226,6 +359,17 @@ class MotionFramePlayer {
     if (this.range) this.range.value = String(this.frameIndex);
     if (this.counter) this.counter.textContent = `Frame ${this.frameIndex + 1}/${this.frameCount}`;
     if (this.label) this.label.textContent = getFrameLabel(this.data, this.frameIndex);
+    updateCellTypePanel(this.root, this.figureKey, this.frameIndex);
+    this.updateLinkedTimeButtons();
+  }
+
+  updateLinkedTimeButtons() {
+    document.querySelectorAll(`[data-time-control-for="${this.figureKey}"]`).forEach((button) => {
+      const targetFrame = Number(button.dataset.frameJump);
+      const isActive = Number.isFinite(targetFrame) && targetFrame === this.frameIndex;
+      button.classList.toggle("active", isActive);
+      button.setAttribute("aria-pressed", String(isActive));
+    });
   }
 
   scheduleNextFrame() {
@@ -280,6 +424,23 @@ function stopMotionPlayers(scope = document) {
     if (!instance) return;
     instance.destroy();
     motionPlayerInstances.delete(root);
+  });
+}
+
+function jumpMotionPlayers(figureKey, frameIndex) {
+  document.querySelectorAll(`[data-motion-player][data-figure="${figureKey}"]`).forEach((root) => {
+    const instance = motionPlayerInstances.get(root);
+    if (!instance) return;
+    instance.setFrame(frameIndex);
+    if (instance.playing) instance.scheduleNextFrame();
+  });
+}
+
+function bindTimeJumpControls(scope = document) {
+  scope.querySelectorAll("[data-frame-jump]").forEach((button) => {
+    button.addEventListener("click", () => {
+      jumpMotionPlayers(button.dataset.timeControlFor, Number(button.dataset.frameJump));
+    });
   });
 }
 
@@ -397,8 +558,9 @@ function setFigure(figureKey) {
   stopMotionPlayers(resultMotion);
   resultMotion.innerHTML = buildMotionPreview(data, figureKey);
   resultMotion.hidden = !data.gif && !hasInteractiveFrames(data);
+  timepoints.innerHTML = buildTimeMeta(data, figureKey);
   hydrateMotionPlayers(resultMotion);
-  timepoints.innerHTML = buildTimeMeta(data);
+  bindTimeJumpControls(timepoints);
 
   if (data.pdf) {
     link.href = data.pdf;
@@ -461,7 +623,7 @@ function buildVizBody(data) {
       <h3>${data.title}</h3>
       <p>${data.dataset} · ${data.role}</p>
       ${buildAnimationMeta(data)}
-      <div class="time-meta">${buildTimeMeta(data)}</div>
+      <div class="time-meta">${buildTimeMeta(data, data.key || "")}</div>
     </div>
   `;
 }
@@ -511,7 +673,6 @@ function buildMotionOptions(keys, activeKey, dataAttr) {
         >
           <span>${data.kicker}</span>
           <strong>${data.shortLabel}</strong>
-          <em>${data.dataset}</em>
         </button>
       `;
     })
@@ -524,7 +685,7 @@ function buildMotionDetailContent(figureKey) {
 
   return `
     <div class="gif-media real-viz-media">${buildMotionPreview(data, figureKey)}</div>
-    ${buildVizBody(data)}
+    ${buildVizBody({ ...data, key: figureKey })}
   `;
 }
 
@@ -546,6 +707,7 @@ function selectSimulationFigure(figureKey) {
   stopMotionPlayers(detail);
   detail.innerHTML = buildMotionDetailContent(figureKey);
   hydrateMotionPlayers(detail);
+  bindTimeJumpControls(detail);
 }
 
 function selectRealFigure(figureKey) {
@@ -566,6 +728,7 @@ function selectRealFigure(figureKey) {
   stopMotionPlayers(detail);
   detail.innerHTML = buildMotionDetailContent(figureKey);
   hydrateMotionPlayers(detail);
+  bindTimeJumpControls(detail);
 }
 
 function selectVizMode(mode) {
@@ -579,12 +742,17 @@ function buildSimulationViz() {
   return `
     <article class="viz-column simulation-viz">
       <div class="viz-section-header">
-        <span>Simulation</span>
-        <h3 data-simulation-viz-title>${activeData.title}</h3>
-        <p>Select one synthetic system to inspect its standardized 0.1-step trajectory animation.</p>
-      </div>
-      <div class="real-viz-options" role="tablist" aria-label="Simulation trajectory selector">
-        ${buildMotionOptions(simulationMotionKeys, activeSimulationKey, "data-simulation-figure")}
+        <div class="viz-title-row">
+          <div>
+            <span>Simulation</span>
+            <h3 data-simulation-viz-title>${activeData.title}</h3>
+            <p>Select one synthetic trajectory for the interactive motion panel.</p>
+          </div>
+          ${buildVizModeToggle()}
+        </div>
+        <div class="real-viz-options" role="tablist" aria-label="Simulation trajectory selector">
+          ${buildMotionOptions(simulationMotionKeys, activeSimulationKey, "data-simulation-figure")}
+        </div>
       </div>
       <div class="real-viz-detail" id="simulation-viz-detail" data-simulation-detail aria-live="polite">
         ${buildMotionDetailContent(activeSimulationKey)}
@@ -598,12 +766,17 @@ function buildRealViz() {
   return `
     <article class="viz-column real-viz">
       <div class="viz-section-header">
-        <span>Real datasets</span>
-        <h3 data-real-viz-title>${activeRealData.title}</h3>
-        <p>Select one biological system to inspect its standardized trajectory animation and time axis.</p>
-      </div>
-      <div class="real-viz-options" role="tablist" aria-label="Real dataset trajectory selector">
-        ${buildMotionOptions(realFigureKeys, activeRealFigureKey, "data-real-figure")}
+        <div class="viz-title-row">
+          <div>
+            <span>Real datasets</span>
+            <h3 data-real-viz-title>${activeRealData.title}</h3>
+            <p>Select one biological system for the same trajectory player.</p>
+          </div>
+          ${buildVizModeToggle()}
+        </div>
+        <div class="real-viz-options" role="tablist" aria-label="Real dataset trajectory selector">
+          ${buildMotionOptions(realFigureKeys, activeRealFigureKey, "data-real-figure")}
+        </div>
       </div>
       <div class="real-viz-detail" id="real-viz-detail" data-real-detail aria-live="polite">
         ${buildMotionDetailContent(activeRealFigureKey)}
@@ -618,7 +791,6 @@ function buildGifGrid() {
   stopMotionPlayers(gifGrid);
 
   gifGrid.innerHTML = `
-    ${buildVizModeToggle()}
     ${activeVizMode === "simulation" ? buildSimulationViz() : buildRealViz()}
   `;
 
@@ -632,6 +804,7 @@ function buildGifGrid() {
     button.addEventListener("click", () => selectRealFigure(button.dataset.realFigure));
   });
   hydrateMotionPlayers(gifGrid);
+  bindTimeJumpControls(gifGrid);
 }
 
 buildHeroAtlas();

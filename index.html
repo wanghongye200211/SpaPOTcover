@@ -3,21 +3,23 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SpaPOT Results Summary</title>
+    <title>SpaPOT Interactive Explainer</title>
+    <link rel="icon" type="image/png" href="assets/spapot_logo_mark.png" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="#overview" aria-label="SpaPOT results home">
-        <span class="brand-mark"></span>
-        <span>SpaPOT Results</span>
+      <a class="brand" href="#overview" aria-label="SpaPOT explainer home">
+        <img class="brand-mark" src="assets/spapot_logo_mark.png" alt="" aria-hidden="true" />
+        <span>SpaPOT Explainer</span>
       </a>
       <nav class="nav-links" aria-label="Primary navigation">
-        <a href="#overview">Overview</a>
-        <a href="#model">Figure 1</a>
+        <a href="#overview">SpaPOT</a>
+        <a href="#model">Model</a>
         <a href="#innovation">Innovation</a>
         <a href="#route">Route</a>
-        <a href="#evidence">Map</a>
+        <a href="#downstream">Downstream</a>
+        <a href="#evidence">Evidence</a>
         <a href="#dynamic">GIFs</a>
         <a href="#results">Figures</a>
       </nav>
@@ -27,29 +29,32 @@
       <section class="hero section-band" id="overview">
         <div class="section-inner hero-grid">
           <div class="hero-copy">
-            <p class="eyebrow">Spatial-potential dynamics summary</p>
-            <h1>SpaPOT Results Summary</h1>
+            <div class="hero-logo-lockup" aria-label="SpaPOT logo">
+              <img src="assets/spapot_logo_full.png" alt="SpaPOT logo" />
+            </div>
+            <p class="eyebrow">Spatial Potential Optimal Transport</p>
+            <h1>SpaPOT Interactive Explainer</h1>
             <p class="lead">
-              This page organizes the current SpaPOT / stVCR results into a clear paper-style narrative: Figure 1 is the graphical abstract, Figure 2 is the simulation benchmark, Figures 3-5 are three real datasets, and Figure 6 is the model comparison.
+              SpaPOT is a spatial-potential optimal transport framework for reconstructing continuous spatial-transcriptomic dynamics from discrete tissue slices, then connecting generated trajectories with interpretable fate shifts and critical transition windows.
             </p>
             <div class="hero-tags" aria-label="Key model themes">
-              <span>spatial alignment</span>
-              <span>potential-driven latent dynamics</span>
-              <span>animated trajectory previews</span>
-              <span>critical-window discovery</span>
+              <span>spatial optimal transport</span>
+              <span>gene-latent potential field</span>
+              <span>growth-aware dynamics</span>
+              <span>critical transition windows</span>
             </div>
             <div class="hero-stats" aria-label="Figure summary">
               <div>
                 <strong>6</strong>
-                <span>figures</span>
+                <span>paper figures</span>
               </div>
               <div>
                 <strong>3</strong>
                 <span>real datasets</span>
               </div>
               <div>
-                <strong>4</strong>
-                <span>animated trajectories</span>
+                <strong>2</strong>
+                <span>simulation systems</span>
               </div>
             </div>
           </div>
@@ -86,10 +91,10 @@
       <section class="section-band" id="model" aria-labelledby="model-title">
         <div class="section-inner model-grid">
           <div class="section-heading">
-            <p class="eyebrow">Figure 1 model overview</p>
+            <p class="eyebrow">Model overview</p>
             <h2 id="model-title">SpaPOT Spatial-Potential Model</h2>
             <p>
-              Figure 1 should serve as the main method overview. It summarizes model inputs, fitted fields, physics-informed training, and critical-biology outputs in one compact visual.
+              The opening model graphic summarizes model inputs, fitted fields, physics-informed training, and critical-biology outputs in one compact visual.
             </p>
           </div>
           <figure class="model-figure">
@@ -132,7 +137,7 @@
             <p class="eyebrow">Innovation</p>
             <h2 id="innovation-title">Innovation Points</h2>
             <p>
-              This section follows Figure 1 and states the main methodological innovations before moving into the result figures.
+              This section follows the model overview and states the main methodological innovations before moving into the result figures.
             </p>
           </div>
           <div class="innovation-grid">
@@ -199,6 +204,42 @@
         </div>
       </section>
 
+      <section class="section-band downstream-band" id="downstream" aria-labelledby="downstream-title">
+        <div class="section-inner downstream-grid">
+          <div class="section-heading">
+            <p class="eyebrow">Downstream interpretation</p>
+            <h2 id="downstream-title">From Generated Dynamics To Biological Readouts</h2>
+            <p>
+              SpaPOT downstream analysis turns reconstructed trajectories into biological hypotheses. The final panels can later be replaced with the full downstream figures, while this section keeps the narrative position clear.
+            </p>
+          </div>
+          <div class="downstream-logic" aria-label="Downstream analysis logic">
+            <article>
+              <span>01</span>
+              <h3>Critical-window scoring</h3>
+              <p>Use the learned potential landscape and trajectory action to mark transition windows where cell states are most sensitive or least stable.</p>
+            </article>
+            <article>
+              <span>02</span>
+              <h3>Fate-shift interpretation</h3>
+              <p>Compare branch composition, generated labels, and terminal-state tendency across simulated and real tissue systems.</p>
+            </article>
+            <article>
+              <span>03</span>
+              <h3>Gene-program support</h3>
+              <p>Connect predicted dynamic regions with enrichment, perturbation response, and potential-associated expression programs.</p>
+            </article>
+          </div>
+          <div class="downstream-placeholder" aria-label="Downstream figure placeholder">
+            <div>
+              <span>Placeholder</span>
+              <strong>Downstream analysis panels</strong>
+              <p>Reserve this area for criticality, fate-shift, perturbation, enrichment, and gene-program evidence once the final panels are ready.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="section-band evidence-band" id="evidence" aria-labelledby="evidence-title">
         <div class="section-inner">
           <div class="section-heading narrow">
@@ -229,7 +270,7 @@
         <div class="section-inner">
           <div class="section-heading narrow">
             <p class="eyebrow">Current figures</p>
-            <h2 id="results-title">Figure 1-6 Browser</h2>
+            <h2 id="results-title">Figure Browser</h2>
             <p>
               Each figure entry includes its role in the paper, a time axis, a static preview, and links to animation or PDF assets when available.
             </p>
@@ -277,6 +318,7 @@
     </main>
 
     <script src="figure-config.js"></script>
+    <script src="motion-stats.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
