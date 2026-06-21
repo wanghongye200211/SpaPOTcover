@@ -22,6 +22,157 @@ const image = document.querySelector("#result-image");
 const link = document.querySelector("#result-link");
 const motionPlayerInstances = new WeakMap();
 const visibleCellTypeLabels = new Map();
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const interactiveSurfaceSelector = [
+  ".atlas-feature",
+  ".atlas-card",
+  ".intro-points div",
+  ".model-figure",
+  ".model-notes article",
+  ".innovation-card",
+  ".route-card",
+  ".downstream-logic article",
+  ".downstream-placeholder",
+  ".evidence-row",
+  ".viz-column",
+  ".real-viz-option",
+  ".motion-player",
+  ".tab-btn",
+  ".result-panel",
+  ".result-preview",
+].join(",");
+const revealSelector = [
+  ".hero-copy",
+  ".hero-atlas",
+  ".section-heading",
+  ".intro-points div",
+  ".model-figure",
+  ".model-notes article",
+  ".innovation-card",
+  ".route-card",
+  ".downstream-logic article",
+  ".downstream-placeholder",
+  ".evidence-row",
+  ".viz-column",
+  ".result-browser",
+  ".claim-grid",
+].join(",");
+
+function setupInteractiveSurfaces(scope = document) {
+  scope.querySelectorAll(interactiveSurfaceSelector).forEach((surface) => {
+    if (surface.dataset.interactionReady === "true") return;
+    surface.dataset.interactionReady = "true";
+    surface.classList.add("interactive-surface");
+
+    surface.addEventListener("pointermove", (event) => {
+      if (reduceMotion.matches) return;
+      const rect = surface.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / Math.max(rect.width, 1)) * 100;
+      const y = ((event.clientY - rect.top) / Math.max(rect.height, 1)) * 100;
+      surface.style.setProperty("--mx", `${x.toFixed(1)}%`);
+      surface.style.setProperty("--my", `${y.toFixed(1)}%`);
+    });
+
+    surface.addEventListener("pointerleave", () => {
+      surface.style.removeProperty("--mx");
+      surface.style.removeProperty("--my");
+    });
+  });
+}
+
+function setupRevealEffects(scope = document) {
+  const items = [...scope.querySelectorAll(revealSelector)].filter(
+    (item) => item.dataset.revealReady !== "true",
+  );
+  if (!items.length) return;
+
+  items.forEach((item) => {
+    item.dataset.revealReady = "true";
+    item.classList.add("will-reveal");
+  });
+
+  if (reduceMotion.matches || !("IntersectionObserver" in window)) {
+    items.forEach((item) => item.classList.add("is-visible"));
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    },
+    { rootMargin: "0px 0px -12% 0px", threshold: 0.08 },
+  );
+
+  items.forEach((item) => {
+    const rect = item.getBoundingClientRect();
+    if (rect.top < window.innerHeight * 0.94) {
+      item.classList.add("is-visible");
+      return;
+    }
+    observer.observe(item);
+  });
+}
+
+function setupActiveNavigation() {
+  const header = document.querySelector(".site-header");
+  const links = [...document.querySelectorAll(".nav-links a")];
+  const sections = links
+    .map((link) => {
+      const id = link.getAttribute("href")?.replace("#", "");
+      return id ? { link, section: document.getElementById(id) } : null;
+    })
+    .filter((item) => item?.section);
+
+  const updateHeaderState = () => {
+    header?.classList.toggle("is-scrolled", window.scrollY > 12);
+  };
+  const setActiveLink = (activeSection) => {
+    sections.forEach(({ link, section }) => {
+      link.classList.toggle("is-active", section === activeSection);
+    });
+  };
+  const updateActiveByScroll = () => {
+    const offset = 130;
+    const active =
+      sections
+        .map(({ section }) => section)
+        .filter((section) => section.getBoundingClientRect().top <= offset)
+        .pop() || sections[0]?.section;
+    if (active) setActiveLink(active);
+  };
+  updateHeaderState();
+  updateActiveByScroll();
+  window.addEventListener(
+    "scroll",
+    () => {
+      updateHeaderState();
+      updateActiveByScroll();
+    },
+    { passive: true },
+  );
+  window.addEventListener("hashchange", () => window.setTimeout(updateActiveByScroll, 120));
+  window.addEventListener("load", () => window.setTimeout(updateActiveByScroll, 120));
+
+  if (!sections.length || !("IntersectionObserver" in window)) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!visible) return;
+
+      setActiveLink(visible.target);
+    },
+    { rootMargin: "-24% 0px -58% 0px", threshold: [0.1, 0.35, 0.6] },
+  );
+
+  sections.forEach(({ section }) => observer.observe(section));
+}
 
 function scrollToHashTarget() {
   if (!window.location.hash) return;
@@ -834,6 +985,8 @@ function buildGifGrid() {
   });
   hydrateMotionPlayers(gifGrid);
   bindTimeJumpControls(gifGrid);
+  setupInteractiveSurfaces(gifGrid);
+  setupRevealEffects(gifGrid);
 }
 
 buildHeroAtlas();
@@ -841,6 +994,9 @@ buildTabs();
 buildEvidenceTable();
 buildGifGrid();
 setFigure(figureKeys[0] || "figure1");
+setupInteractiveSurfaces(document);
+setupRevealEffects(document);
+setupActiveNavigation();
 
 tabsContainer?.addEventListener("click", (event) => {
   const tab = event.target.closest(".tab-btn");
