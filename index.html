@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>SpaPOT Interactive Explainer</title>
     <link rel="icon" type="image/png" href="assets/spapot_logo_mark.png" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=20260621b" />
   </head>
   <body>
     <header class="site-header">
@@ -27,7 +27,7 @@
 
     <main>
       <section class="hero section-band" id="overview">
-        <div class="section-inner hero-grid">
+        <div class="section-inner hero-shell">
           <div class="hero-copy">
             <div class="hero-logo-lockup" aria-label="SpaPOT logo">
               <img src="assets/spapot_logo_full.png" alt="SpaPOT logo" />
@@ -35,7 +35,7 @@
             <p class="eyebrow">Spatial Potential Optimal Transport</p>
             <h1>SpaPOT Interactive Explainer</h1>
             <p class="lead">
-              SpaPOT is a spatial-potential optimal transport framework for reconstructing continuous spatial-transcriptomic dynamics from discrete tissue slices, then connecting generated trajectories with interpretable fate shifts and critical transition windows.
+              A compact visual guide to SpaPOT: continuous spatial-transcriptomic dynamics, potential-guided cell-state motion, and interpretable transition signals across simulation and biological datasets.
             </p>
             <div class="hero-tags" aria-label="Key model themes">
               <span>spatial optimal transport</span>
@@ -43,22 +43,8 @@
               <span>growth-aware dynamics</span>
               <span>critical transition windows</span>
             </div>
-            <div class="hero-stats" aria-label="Figure summary">
-              <div>
-                <strong>6</strong>
-                <span>paper figures</span>
-              </div>
-              <div>
-                <strong>3</strong>
-                <span>real datasets</span>
-              </div>
-              <div>
-                <strong>2</strong>
-                <span>simulation systems</span>
-              </div>
-            </div>
           </div>
-          <div class="hero-atlas" id="hero-atlas" aria-label="Figure 1-6 visual atlas"></div>
+          <div class="hero-atlas" id="hero-atlas" aria-label="SpaPOT visual overview"></div>
         </div>
       </section>
 
@@ -270,9 +256,9 @@
         <div class="section-inner">
           <div class="section-heading narrow">
             <p class="eyebrow">Current figures</p>
-            <h2 id="results-title">Figure Browser</h2>
+            <h2 id="results-title">Static Figure Browser</h2>
             <p>
-              Each figure entry includes its role in the paper, a time axis, a static preview, and links to animation or PDF assets when available.
+              Each entry shows the static figure preview, evidence focus, and PDF link when available. Interactive trajectory playback is kept in the animation section above.
             </p>
           </div>
 
@@ -281,23 +267,19 @@
 
             <article class="result-panel" aria-live="polite">
               <div class="result-copy">
-                <p class="result-kicker" id="result-kicker">Figure 1</p>
+                <p class="result-kicker" id="result-kicker">Model overview</p>
                 <h3 id="result-title">Graphical abstract and model overview</h3>
                 <p id="result-body">The graphical abstract introduces the core problem, model structure, and major outputs.</p>
                 <div class="result-evidence" id="result-evidence" aria-label="Selected figure evidence"></div>
                 <div class="result-assets" id="result-assets" aria-label="Selected figure asset status"></div>
-                <div class="result-animation" id="result-animation" aria-label="Selected figure animation metadata"></div>
-                <div class="time-meta" id="result-timepoints"></div>
                 <div class="result-actions">
                   <a id="result-link" class="pdf-link" href="#" aria-disabled="true">PDF pending</a>
-                  <a id="result-gif-link" class="pdf-link ghost-link" href="#dynamic">View GIF</a>
                 </div>
               </div>
               <div class="result-media">
                 <figure class="result-preview">
-                  <img id="result-image" src="assets/figure1_model.png" alt="Figure 1 preview" />
+                  <img id="result-image" src="assets/figure1_model.png" alt="Model overview preview" />
                 </figure>
-                <div class="result-motion" id="result-motion" aria-label="Selected figure motion preview"></div>
               </div>
             </article>
           </div>
@@ -318,7 +300,7 @@
     </main>
 
     <script src="figure-config.js"></script>
-    <script src="motion-stats.js?v=20260621a"></script>
-    <script src="script.js?v=20260621a"></script>
+    <script src="motion-stats.js?v=20260621b"></script>
+    <script src="script.js?v=20260621b"></script>
   </body>
 </html>

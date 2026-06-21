@@ -18,12 +18,8 @@ const title = document.querySelector("#result-title");
 const body = document.querySelector("#result-body");
 const resultEvidence = document.querySelector("#result-evidence");
 const resultAssets = document.querySelector("#result-assets");
-const resultAnimation = document.querySelector("#result-animation");
 const image = document.querySelector("#result-image");
-const resultMotion = document.querySelector("#result-motion");
 const link = document.querySelector("#result-link");
-const gifLink = document.querySelector("#result-gif-link");
-const timepoints = document.querySelector("#result-timepoints");
 const motionPlayerInstances = new WeakMap();
 const visibleCellTypeLabels = new Map();
 
@@ -104,8 +100,6 @@ function buildAssetMeta(data) {
   const assets = [
     { label: "Preview", available: Boolean(data.preview) },
     { label: "PDF", available: Boolean(data.pdf) },
-    { label: "GIF", available: Boolean(data.gif) },
-    { label: "Frames", available: hasInteractiveFrames(data) },
   ];
 
   return `
@@ -488,8 +482,8 @@ function buildTabs() {
       const data = figureData[key];
       return `
         <button class="tab-btn ${index === 0 ? "active" : ""}" type="button" role="tab" aria-selected="${index === 0}" data-figure="${key}">
-          <span>${data.kicker}</span>
-          <small>${data.shortLabel}</small>
+          <span>${data.shortLabel}</span>
+          <small>${data.title}</small>
         </button>
       `;
     })
@@ -498,30 +492,55 @@ function buildTabs() {
 
 function buildHeroAtlas() {
   if (!heroAtlas) return;
+  const primaryKey = figureKeys.find((key) => key === "figure1") || figureKeys[0];
+  const primary = figureData[primaryKey];
+  const secondaryKeys = figureKeys.filter((key) => key !== primaryKey);
+  if (!primary) return;
 
-  heroAtlas.innerHTML = figureKeys
-    .map((key, index) => {
-      const data = figureData[key];
-      return `
-        <article
-          class="atlas-card ${index === 0 ? "atlas-card-large" : ""}"
-          data-figure="${key}"
-          role="button"
-          tabindex="0"
-          aria-pressed="${index === 0}"
-          aria-label="Open ${data.kicker}: ${data.shortLabel}"
-        >
-          <div class="atlas-media">
-            <img src="${data.preview}" alt="${data.alt || data.title}" />
-          </div>
-          <div class="atlas-copy">
-            <span>${data.kicker}</span>
-            <strong>${data.shortLabel}</strong>
-          </div>
-        </article>
-      `;
-    })
-    .join("");
+  heroAtlas.innerHTML = `
+    <article
+      class="atlas-feature active"
+      data-figure="${primaryKey}"
+      role="button"
+      tabindex="0"
+      aria-pressed="true"
+      aria-label="Open ${primary.title}"
+    >
+      <div class="atlas-feature-media">
+        <img src="${primary.preview}" alt="${primary.alt || primary.title}" />
+      </div>
+      <div class="atlas-feature-copy">
+        <span>Graphical abstract</span>
+        <strong>${primary.title}</strong>
+        <p>${primary.body}</p>
+      </div>
+    </article>
+    <div class="atlas-strip" aria-label="Other result previews">
+      ${secondaryKeys
+        .map((key) => {
+          const data = figureData[key];
+          return `
+            <article
+              class="atlas-card"
+              data-figure="${key}"
+              role="button"
+              tabindex="0"
+              aria-pressed="false"
+              aria-label="Open ${data.title}"
+            >
+              <div class="atlas-media">
+                <img src="${data.preview}" alt="${data.alt || data.title}" />
+              </div>
+              <div class="atlas-copy">
+                <strong>${data.shortLabel}</strong>
+                <small>${data.title}</small>
+              </div>
+            </article>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
 }
 
 function buildEvidenceTable() {
@@ -577,26 +596,19 @@ function setFigure(figureKey) {
     tab.setAttribute("aria-selected", String(isActive));
   });
 
-  document.querySelectorAll(".atlas-card, .evidence-row").forEach((item) => {
+  document.querySelectorAll(".atlas-feature, .atlas-card, .evidence-row").forEach((item) => {
     const isActive = item.dataset.figure === figureKey;
     item.classList.toggle("active", isActive);
     item.setAttribute("aria-pressed", String(isActive));
   });
 
-  kicker.textContent = `${data.kicker} · ${data.role}`;
+  kicker.textContent = data.shortLabel;
   title.textContent = data.title;
   body.textContent = data.body;
   resultEvidence.innerHTML = buildEvidenceMeta(data);
   resultAssets.innerHTML = buildAssetMeta(data);
-  resultAnimation.innerHTML = buildAnimationMeta(data);
   image.src = data.preview;
   image.alt = data.alt || `${data.kicker} preview`;
-  stopMotionPlayers(resultMotion);
-  resultMotion.innerHTML = buildMotionPreview(data, figureKey);
-  resultMotion.hidden = !data.gif && !hasInteractiveFrames(data);
-  timepoints.innerHTML = buildTimeMeta(data, figureKey);
-  hydrateMotionPlayers(resultMotion);
-  bindTimeJumpControls(timepoints);
 
   if (data.pdf) {
     link.href = data.pdf;
@@ -610,18 +622,6 @@ function setFigure(figureKey) {
     link.classList.add("is-disabled");
   }
 
-  if (data.gif) {
-    const gifTarget = figureKey === "figure2" ? "simPitchfork" : figureKey;
-    gifLink.href = `#gif-${gifTarget}`;
-    gifLink.textContent = "View GIF";
-    gifLink.removeAttribute("aria-disabled");
-    gifLink.classList.remove("is-disabled");
-  } else {
-    gifLink.href = "#dynamic";
-    gifLink.textContent = "GIF pending";
-    gifLink.setAttribute("aria-disabled", "true");
-    gifLink.classList.add("is-disabled");
-  }
 }
 
 function chooseFigure(figureKey, options = {}) {
