@@ -509,11 +509,6 @@ function buildHeroAtlas() {
       <div class="atlas-feature-media">
         <img src="${primary.preview}" alt="${primary.alt || primary.title}" />
       </div>
-      <div class="atlas-feature-copy">
-        <span>Graphical abstract</span>
-        <strong>${primary.title}</strong>
-        <p>${primary.body}</p>
-      </div>
     </article>
     <div class="atlas-strip" aria-label="Other result previews">
       ${secondaryKeys
