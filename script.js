@@ -553,8 +553,6 @@ function buildEvidenceTable() {
       const assetLabels = [
         data.preview ? "Preview" : "",
         data.pdf ? "PDF" : "",
-        data.gif ? "GIF" : "",
-        hasInteractiveFrames(data) ? "Frames" : "",
       ].filter(Boolean);
 
       return `
