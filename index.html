@@ -18,10 +18,11 @@
       </a>
       <nav class="nav-links" aria-label="Primary navigation">
         <a href="#overview">Overview</a>
-        <a href="#dynamic">Interactive</a>
+        <a href="#model">Figure 1</a>
         <a href="#innovation">Highlights</a>
+        <a href="#dynamic">Interactive</a>
         <a href="#downstream">Downstream</a>
-        <a href="#results">Figures</a>
+        <a href="#route">Figures</a>
       </nav>
       <a class="header-cta" href="#dynamic">Explore interactive results</a>
     </header>
@@ -55,6 +56,7 @@
         </div>
       </section>
 
+      <!--
       <section class="section-band intro-band" aria-labelledby="intro-title">
         <div class="section-inner intro-grid">
           <div>
@@ -80,6 +82,7 @@
           </div>
         </div>
       </section>
+      -->
 
       <section class="section-band" id="model" aria-labelledby="model-title">
         <div class="section-inner model-grid">
@@ -153,6 +156,55 @@
         </div>
       </section>
 
+      <section class="section-band dynamic-band" id="dynamic" aria-labelledby="dynamic-title">
+        <div class="section-inner">
+          <div class="section-heading narrow">
+            <p class="eyebrow">Data visualization</p>
+            <h2 id="dynamic-title">Simulation And Real-Data Trajectory Panels</h2>
+            <p>
+              The visualization area is separated into one simulation panel and one real-data panel. The real-data panel switches between mouse midbrain, zebrafish, and axolotl brain trajectories while keeping the same play, pause, frame-seeking, and speed controls.
+            </p>
+          </div>
+          <div class="viz-display" id="gif-grid" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="section-band downstream-band" id="downstream" aria-labelledby="downstream-title">
+        <div class="section-inner downstream-grid">
+          <div class="section-heading">
+            <p class="eyebrow">Downstream interpretation</p>
+            <h2 id="downstream-title">From Generated Dynamics To Biological Readouts</h2>
+            <p>
+              SpaPOT downstream analysis turns reconstructed trajectories into biological hypotheses. The final panels can later be replaced with the full downstream figures, while this section keeps the narrative position clear.
+            </p>
+          </div>
+          <div class="downstream-logic" aria-label="Downstream analysis logic">
+            <article>
+              <span>01</span>
+              <h3>Critical-window scoring</h3>
+              <p>Use the learned potential landscape and trajectory action to mark transition windows where cell states are most sensitive or least stable.</p>
+            </article>
+            <article>
+              <span>02</span>
+              <h3>Fate-shift interpretation</h3>
+              <p>Compare branch composition, generated labels, and terminal-state tendency across simulated and real tissue systems.</p>
+            </article>
+            <article>
+              <span>03</span>
+              <h3>Gene-program support</h3>
+              <p>Connect predicted dynamic regions with enrichment, perturbation response, and potential-associated expression programs.</p>
+            </article>
+          </div>
+          <div class="downstream-placeholder" aria-label="Downstream figure placeholder">
+            <div>
+              <span>Placeholder</span>
+              <strong>Downstream analysis panels</strong>
+              <p>Reserve this area for criticality, fate-shift, perturbation, enrichment, and gene-program evidence once the final panels are ready.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="section-band route-band" id="route" aria-labelledby="route-title">
         <div class="section-inner">
           <div class="section-heading narrow">
@@ -197,42 +249,6 @@
         </div>
       </section>
 
-      <section class="section-band downstream-band" id="downstream" aria-labelledby="downstream-title">
-        <div class="section-inner downstream-grid">
-          <div class="section-heading">
-            <p class="eyebrow">Downstream interpretation</p>
-            <h2 id="downstream-title">From Generated Dynamics To Biological Readouts</h2>
-            <p>
-              SpaPOT downstream analysis turns reconstructed trajectories into biological hypotheses. The final panels can later be replaced with the full downstream figures, while this section keeps the narrative position clear.
-            </p>
-          </div>
-          <div class="downstream-logic" aria-label="Downstream analysis logic">
-            <article>
-              <span>01</span>
-              <h3>Critical-window scoring</h3>
-              <p>Use the learned potential landscape and trajectory action to mark transition windows where cell states are most sensitive or least stable.</p>
-            </article>
-            <article>
-              <span>02</span>
-              <h3>Fate-shift interpretation</h3>
-              <p>Compare branch composition, generated labels, and terminal-state tendency across simulated and real tissue systems.</p>
-            </article>
-            <article>
-              <span>03</span>
-              <h3>Gene-program support</h3>
-              <p>Connect predicted dynamic regions with enrichment, perturbation response, and potential-associated expression programs.</p>
-            </article>
-          </div>
-          <div class="downstream-placeholder" aria-label="Downstream figure placeholder">
-            <div>
-              <span>Placeholder</span>
-              <strong>Downstream analysis panels</strong>
-              <p>Reserve this area for criticality, fate-shift, perturbation, enrichment, and gene-program evidence once the final panels are ready.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section class="section-band evidence-band" id="evidence" aria-labelledby="evidence-title">
         <div class="section-inner">
           <div class="section-heading narrow">
@@ -243,19 +259,6 @@
             </p>
           </div>
           <div class="evidence-table" id="evidence-table" aria-label="Figure evidence matrix"></div>
-        </div>
-      </section>
-
-      <section class="section-band dynamic-band" id="dynamic" aria-labelledby="dynamic-title">
-        <div class="section-inner">
-          <div class="section-heading narrow">
-            <p class="eyebrow">Data visualization</p>
-            <h2 id="dynamic-title">Simulation And Real-Data Trajectory Panels</h2>
-            <p>
-              The visualization area is separated into one simulation panel and one real-data panel. The real-data panel switches between mouse midbrain, zebrafish, and axolotl brain trajectories while keeping the same play, pause, frame-seeking, and speed controls.
-            </p>
-          </div>
-          <div class="viz-display" id="gif-grid" aria-live="polite"></div>
         </div>
       </section>
 
