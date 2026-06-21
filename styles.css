@@ -2298,7 +2298,9 @@ p {
   }
 
   .result-tabs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    grid-template-columns: none;
   }
 
   .asset-status {
@@ -2431,7 +2433,9 @@ p {
   }
 
   .result-tabs {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-wrap: wrap;
+    grid-template-columns: none;
   }
 
   .route-grid {
