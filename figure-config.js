@@ -127,7 +127,7 @@ window.SpaPOT_FIGURES = {
       "The model comparison summarizes how SpaPOT differs from other methods in prediction, alignment, temporal interpolation, and biological interpretability across datasets.",
     preview: "assets/figure6_preview.png",
     gif: "",
-    pdf: "",
+    pdf: "assets/pdfs/figure6.pdf",
     alt: "Figure 6 model comparison placeholder",
     evidence: ["cross-dataset benchmark", "method comparison", "interpretability endpoint"],
     animation: [],
