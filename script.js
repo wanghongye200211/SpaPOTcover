@@ -16,6 +16,7 @@ const gifGrid = document.querySelector("#gif-grid");
 const kicker = document.querySelector("#result-kicker");
 const title = document.querySelector("#result-title");
 const body = document.querySelector("#result-body");
+const resultLegend = document.querySelector("#result-legend");
 const resultEvidence = document.querySelector("#result-evidence");
 const resultAssets = document.querySelector("#result-assets");
 const image = document.querySelector("#result-image");
@@ -62,7 +63,7 @@ const interactiveSurfaceSelector = [
   ".innovation-card",
   ".route-card",
   ".downstream-logic article",
-  ".downstream-placeholder",
+  ".downstream-card",
   ".evidence-row",
   ".viz-column",
   ".real-viz-option",
@@ -89,7 +90,7 @@ const revealSelector = [
   ".innovation-card",
   ".route-card",
   ".downstream-logic article",
-  ".downstream-placeholder",
+  ".downstream-card",
   ".evidence-row",
   ".viz-column",
   ".result-browser",
@@ -919,6 +920,11 @@ function setFigure(figureKey, options = {}) {
   kicker.textContent = data.shortLabel;
   title.textContent = data.title;
   body.textContent = data.body;
+  if (resultLegend) {
+    resultLegend.innerHTML = data.legend
+      ? `<p class="time-label">Figure legend</p><p>${data.legend}</p>`
+      : "";
+  }
   resultEvidence.innerHTML = buildEvidenceMeta(data);
   resultAssets.innerHTML = buildAssetMeta(data);
   image.src = data.preview;

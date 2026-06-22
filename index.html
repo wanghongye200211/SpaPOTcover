@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>SpaPOT Interactive Explainer</title>
     <link rel="icon" type="image/png" href="assets/spapot_logo_mark.png" />
-    <link rel="stylesheet" href="styles.css?v=20260622h" />
+    <link rel="stylesheet" href="styles.css?v=20260622k" />
   </head>
   <body>
     <header class="site-header">
@@ -22,7 +22,7 @@
         <a href="#innovation">Highlights</a>
         <a href="#dynamic">Interactive</a>
         <a href="#downstream">Downstream</a>
-        <a href="#route">Figures</a>
+        <a href="#results">Figures</a>
       </nav>
       <a class="header-cta" href="#dynamic">Explore interactive results</a>
     </header>
@@ -178,29 +178,91 @@
               SpaPOT downstream analysis turns reconstructed trajectories into biological hypotheses. The final panels can later be replaced with the full downstream figures, while this section keeps the narrative position clear.
             </p>
           </div>
-          <div class="downstream-logic" aria-label="Downstream analysis logic">
-            <article>
-              <span>01</span>
-              <h3>Critical-window scoring</h3>
-              <p>Use the learned potential landscape and trajectory action to mark transition windows where cell states are most sensitive or least stable.</p>
+          <div class="downstream-panels" aria-label="Downstream analysis panels">
+            <article class="downstream-card">
+              <div class="downstream-card-title">Lineage Allocation</div>
+              <figure class="downstream-media">
+                <img src="assets/downstream/lineage.png" alt="Lineage allocation downstream panel preview" />
+              </figure>
+              <div class="downstream-card-copy">
+                <h3>Fate-flow summaries</h3>
+                <p>Model-inferred allocation panels connect reconstructed trajectories with branch transitions and terminal-state shifts across staged spatial data.</p>
+                <a href="downstream_normalized/lineage.pdf">Open PDF</a>
+              </div>
             </article>
-            <article>
-              <span>02</span>
-              <h3>Fate-shift interpretation</h3>
-              <p>Compare branch composition, generated labels, and terminal-state tendency across simulated and real tissue systems.</p>
+            <article class="downstream-card">
+              <div class="downstream-card-title">Critical Window Detection</div>
+              <figure class="downstream-media">
+                <img src="assets/downstream/criticality.png" alt="Critical-window downstream panel preview" />
+              </figure>
+              <div class="downstream-card-copy">
+                <h3>Onset-oriented sensitivity</h3>
+                <p>Critical-score panels separate rising-edge signals from later maxima, linking potential reorganisation with paired lineage or state-mass readouts.</p>
+                <a href="downstream/%E4%B8%B4%E7%95%8C.pdf">Open PDF</a>
+              </div>
             </article>
-            <article>
-              <span>03</span>
-              <h3>Gene-program support</h3>
-              <p>Connect predicted dynamic regions with enrichment, perturbation response, and potential-associated expression programs.</p>
+            <article class="downstream-card">
+              <div class="downstream-card-title">Spatial Velocity Field</div>
+              <figure class="downstream-media">
+                <img src="assets/downstream/spatial_velocity.png" alt="Spatial-velocity downstream panel preview" />
+              </figure>
+              <div class="downstream-card-copy">
+                <h3>Velocity and tissue motion</h3>
+                <p>Spatial-velocity views show where reconstructed spots move across developmental or injury time, complementing potential and growth-field readouts.</p>
+                <a href="downstream/%E7%A9%BA%E9%97%B4%E9%80%9F%E5%BA%A6.pdf">Open PDF</a>
+              </div>
+            </article>
+            <article class="downstream-card">
+              <div class="downstream-card-title">Perturbation Response</div>
+              <figure class="downstream-media">
+                <img src="assets/downstream/perturbation.png" alt="Perturbation downstream panel preview" />
+              </figure>
+              <div class="downstream-card-copy">
+                <h3>Model-derived response screens</h3>
+                <p>In silico perturbation panels summarise how selected gene shifts alter terminal-state probabilities and branch allocation in the learned SpaPOT state space.</p>
+                <a href="downstream_normalized/perturbation.pdf">Open PDF</a>
+              </div>
             </article>
           </div>
-          <div class="downstream-placeholder" aria-label="Downstream figure placeholder">
-            <div>
-              <span>Placeholder</span>
-              <strong>Downstream analysis panels</strong>
-              <p>Reserve this area for criticality, fate-shift, perturbation, enrichment, and gene-program evidence once the final panels are ready.</p>
-            </div>
+        </div>
+      </section>
+
+      <section class="section-band results-band" id="results" aria-labelledby="results-title">
+        <div class="section-inner">
+          <div class="section-heading narrow">
+            <p class="eyebrow">Current figures</p>
+            <h2 id="results-title">Static Figure Browser</h2>
+            <p>
+              Each entry shows the static figure preview, manuscript legend, evidence focus, and PDF link when available. Interactive trajectory playback is kept in the animation section above.
+            </p>
+          </div>
+
+          <div class="result-browser">
+            <div class="result-tabs" id="result-tabs" role="tablist" aria-label="Result figure tabs"></div>
+
+            <article class="result-panel" aria-live="polite">
+              <div class="result-copy">
+                <p class="result-kicker" id="result-kicker">Model overview</p>
+                <h3 id="result-title">Graphical abstract and model overview</h3>
+                <details class="figure-caption result-details">
+                  <summary>Content</summary>
+                  <div class="result-detail-body">
+                    <p id="result-body">The graphical abstract introduces the core problem, model structure, and major outputs.</p>
+                    <div class="result-legend" id="result-legend" aria-label="Selected figure legend"></div>
+                    <div class="result-evidence" id="result-evidence" aria-label="Selected figure evidence"></div>
+                    <div class="result-assets" id="result-assets" aria-label="Selected figure asset status"></div>
+                  </div>
+                </details>
+                <div class="result-actions">
+                  <a id="result-link" class="pdf-link" href="#" aria-disabled="true">PDF pending</a>
+                </div>
+              </div>
+              <div class="result-media">
+                <figure class="result-preview">
+                  <img id="result-image" src="assets/figure1_model.png" alt="Model overview preview" />
+                </figure>
+              </div>
+            </article>
           </div>
         </div>
       </section>
@@ -262,45 +324,6 @@
         </div>
       </section>
 
-      <section class="section-band results-band" id="results" aria-labelledby="results-title">
-        <div class="section-inner">
-          <div class="section-heading narrow">
-            <p class="eyebrow">Current figures</p>
-            <h2 id="results-title">Static Figure Browser</h2>
-            <p>
-              Each entry shows the static figure preview, evidence focus, and PDF link when available. Interactive trajectory playback is kept in the animation section above.
-            </p>
-          </div>
-
-          <div class="result-browser">
-            <div class="result-tabs" id="result-tabs" role="tablist" aria-label="Result figure tabs"></div>
-
-            <article class="result-panel" aria-live="polite">
-              <div class="result-copy">
-                <p class="result-kicker" id="result-kicker">Model overview</p>
-                <h3 id="result-title">Graphical abstract and model overview</h3>
-                <details class="figure-caption result-details">
-                  <summary>Content</summary>
-                  <div class="result-detail-body">
-                    <p id="result-body">The graphical abstract introduces the core problem, model structure, and major outputs.</p>
-                    <div class="result-evidence" id="result-evidence" aria-label="Selected figure evidence"></div>
-                    <div class="result-assets" id="result-assets" aria-label="Selected figure asset status"></div>
-                  </div>
-                </details>
-                <div class="result-actions">
-                  <a id="result-link" class="pdf-link" href="#" aria-disabled="true">PDF pending</a>
-                </div>
-              </div>
-              <div class="result-media">
-                <figure class="result-preview">
-                  <img id="result-image" src="assets/figure1_model.png" alt="Model overview preview" />
-                </figure>
-              </div>
-            </article>
-          </div>
-        </div>
-      </section>
-
       <section class="section-band claim-band" aria-labelledby="claim-title">
         <div class="section-inner claim-grid">
           <div>
@@ -314,8 +337,8 @@
       </section>
     </main>
 
-    <script src="figure-config.js?v=20260622b"></script>
+    <script src="figure-config.js?v=20260622d"></script>
     <script src="motion-stats.js?v=20260621b"></script>
-    <script src="script.js?v=20260622g"></script>
+    <script src="script.js?v=20260622h"></script>
   </body>
 </html>
