@@ -23,6 +23,35 @@ const link = document.querySelector("#result-link");
 const motionPlayerInstances = new WeakMap();
 const visibleCellTypeLabels = new Map();
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const uiIcons = {
+  play: `
+    <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M8 5.6v12.8L18.4 12 8 5.6Z" />
+    </svg>
+  `,
+  pause: `
+    <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 5.5h3.8v13H7v-13Zm6.2 0H17v13h-3.8v-13Z" />
+    </svg>
+  `,
+  reset: `
+    <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6.7 7.2A7 7 0 1 1 5 12h2.2a4.8 4.8 0 1 0 1.2-3.2L11 11.4H4.6V5l2.1 2.2Z" />
+    </svg>
+  `,
+  simulation: `
+    <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M5.2 15.8c2.8-6.8 6.8-6.8 9.6 0 1.1 2.7 2.2 3.6 3.8 3.6h.7v2h-.7c-2.7 0-4.4-1.6-5.8-4.8-2-4.9-3.6-4.9-5.6 0-1.4 3.2-3.1 4.8-5.8 4.8H.8v-2h.6c1.6 0 2.7-.9 3.8-3.6Z" />
+      <path d="M4.8 3.6h3v3h-3v-3Zm5.6 4.6h3v3h-3v-3Zm5.8-4h3v3h-3v-3Z" />
+    </svg>
+  `,
+  real: `
+    <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 3.4c4.7 0 8.6 3.8 8.6 8.6s-3.9 8.6-8.6 8.6S3.4 16.7 3.4 12 7.3 3.4 12 3.4Zm0 2.1A6.5 6.5 0 1 0 18.5 12 6.5 6.5 0 0 0 12 5.5Z" />
+      <path d="M10.2 8.2h3.6v2.6h2.6v3.6h-2.6V17h-3.6v-2.6H7.6v-3.6h2.6V8.2Z" />
+    </svg>
+  `,
+};
 const interactiveSurfaceSelector = [
   ".atlas-feature",
   ".atlas-card",
@@ -41,6 +70,14 @@ const interactiveSurfaceSelector = [
   ".result-panel",
   ".result-preview",
 ].join(",");
+
+function renderIcon(name) {
+  return uiIcons[name] || "";
+}
+
+function clampValue(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
 const revealSelector = [
   ".hero-copy",
   ".hero-atlas",
@@ -452,11 +489,17 @@ function buildMotionPreview(data, figureKey) {
       </div>
       <div class="motion-content-grid">
         <div class="motion-main">
-          <div class="motion-stage">
-            <img data-frame-image src="${firstFrame}" alt="${data.alt || `${data.kicker} animated trajectory frame`}" />
+          <div class="motion-stage" data-motion-stage aria-label="Drag to pan, scroll to zoom, double-click to reset">
+            <div class="motion-viewport" data-motion-viewport>
+              <img data-frame-image src="${firstFrame}" alt="${data.alt || `${data.kicker} animated trajectory frame`}" draggable="false" />
+            </div>
+            <span class="motion-view-hint">Scroll to zoom · drag to pan</span>
           </div>
           <div class="motion-controls">
-            <button class="motion-control motion-play" type="button" data-play aria-label="Play ${data.kicker} animation">Play</button>
+            <button class="motion-control motion-play motion-icon-button" type="button" data-play aria-label="Play ${data.kicker} animation" title="Play">
+              ${renderIcon("play")}
+              <span class="visually-hidden">Play</span>
+            </button>
             <input
               class="motion-range"
               type="range"
@@ -468,6 +511,10 @@ function buildMotionPreview(data, figureKey) {
               aria-label="${data.kicker} animation frame"
             />
             <button class="motion-control motion-speed" type="button" data-speed aria-label="Toggle ${data.kicker} animation speed">1x</button>
+            <button class="motion-control motion-reset motion-icon-button" type="button" data-reset-view aria-label="Reset ${data.kicker} view" title="Reset view">
+              ${renderIcon("reset")}
+              <span class="visually-hidden">Reset view</span>
+            </button>
           </div>
           <div class="motion-status" aria-live="polite">
             <span data-frame-counter>Frame 1/${frameCount}</span>
@@ -497,20 +544,31 @@ class MotionFramePlayer {
     this.playing = false;
     this.timer = null;
     this.preloadedFrames = new Map();
+    this.viewScale = 1;
+    this.viewX = 0;
+    this.viewY = 0;
+    this.dragState = null;
+    this.stage = root.querySelector("[data-motion-stage]");
+    this.viewport = root.querySelector("[data-motion-viewport]");
     this.image = root.querySelector("[data-frame-image]");
     this.range = root.querySelector("[data-range]");
     this.playButton = root.querySelector("[data-play]");
     this.speedButton = root.querySelector("[data-speed]");
+    this.resetViewButton = root.querySelector("[data-reset-view]");
     this.counter = root.querySelector("[data-frame-counter]");
     this.label = root.querySelector("[data-frame-label]");
 
     this.playButton?.addEventListener("click", () => this.togglePlay());
     this.speedButton?.addEventListener("click", () => this.toggleSpeed());
+    this.resetViewButton?.addEventListener("click", () => this.resetView());
     this.range?.addEventListener("input", (event) => {
       this.setFrame(Number(event.target.value));
       if (this.playing) this.scheduleNextFrame();
     });
+    this.setupViewportInteractions();
 
+    this.updatePlayButton();
+    this.updateViewTransform();
     this.setFrame(0);
   }
 
@@ -566,7 +624,7 @@ class MotionFramePlayer {
   togglePlay() {
     this.playing = !this.playing;
     this.root.classList.toggle("is-playing", this.playing);
-    if (this.playButton) this.playButton.textContent = this.playing ? "Pause" : "Play";
+    this.updatePlayButton();
 
     if (this.playing) {
       this.advanceFrame();
@@ -576,6 +634,17 @@ class MotionFramePlayer {
     }
   }
 
+  updatePlayButton() {
+    if (!this.playButton) return;
+    const action = this.playing ? "Pause" : "Play";
+    this.playButton.innerHTML = `
+      ${renderIcon(this.playing ? "pause" : "play")}
+      <span class="visually-hidden">${action}</span>
+    `;
+    this.playButton.setAttribute("aria-label", `${action} ${this.data?.kicker || "trajectory"} animation`);
+    this.playButton.title = action;
+  }
+
   toggleSpeed() {
     this.speed = this.speed === 1 ? 2 : 1;
     if (this.speedButton) {
@@ -583,6 +652,84 @@ class MotionFramePlayer {
       this.speedButton.classList.toggle("is-fast", this.speed !== 1);
     }
     if (this.playing) this.scheduleNextFrame();
+  }
+
+  setupViewportInteractions() {
+    if (!this.stage || !this.viewport) return;
+
+    this.stage.addEventListener(
+      "wheel",
+      (event) => {
+        event.preventDefault();
+        const direction = event.deltaY > 0 ? -1 : 1;
+        const nextScale = clampValue(this.viewScale * (direction > 0 ? 1.14 : 0.88), 1, 4);
+        this.viewScale = Number(nextScale.toFixed(3));
+        this.constrainPan();
+        this.updateViewTransform();
+      },
+      { passive: false },
+    );
+
+    this.stage.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      this.dragState = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        viewX: this.viewX,
+        viewY: this.viewY,
+      };
+      this.stage.setPointerCapture?.(event.pointerId);
+      this.stage.classList.add("is-dragging");
+    });
+
+    this.stage.addEventListener("pointermove", (event) => {
+      if (!this.dragState || this.dragState.pointerId !== event.pointerId) return;
+      this.viewX = this.dragState.viewX + event.clientX - this.dragState.startX;
+      this.viewY = this.dragState.viewY + event.clientY - this.dragState.startY;
+      this.constrainPan();
+      this.updateViewTransform();
+    });
+
+    const stopDragging = (event) => {
+      if (!this.dragState || this.dragState.pointerId !== event.pointerId) return;
+      this.stage.releasePointerCapture?.(event.pointerId);
+      this.stage.classList.remove("is-dragging");
+      this.dragState = null;
+    };
+
+    this.stage.addEventListener("pointerup", stopDragging);
+    this.stage.addEventListener("pointercancel", stopDragging);
+    this.stage.addEventListener("dblclick", () => this.resetView());
+  }
+
+  constrainPan() {
+    if (!this.stage || this.viewScale <= 1) {
+      this.viewX = 0;
+      this.viewY = 0;
+      return;
+    }
+
+    const rect = this.stage.getBoundingClientRect();
+    const maxX = (rect.width * (this.viewScale - 1)) / 2;
+    const maxY = (rect.height * (this.viewScale - 1)) / 2;
+    this.viewX = clampValue(this.viewX, -maxX, maxX);
+    this.viewY = clampValue(this.viewY, -maxY, maxY);
+  }
+
+  updateViewTransform() {
+    if (!this.viewport) return;
+    this.viewport.style.setProperty("--motion-scale", String(this.viewScale));
+    this.viewport.style.setProperty("--motion-pan-x", `${this.viewX.toFixed(1)}px`);
+    this.viewport.style.setProperty("--motion-pan-y", `${this.viewY.toFixed(1)}px`);
+    this.root.classList.toggle("is-zoomed", this.viewScale > 1.01);
+  }
+
+  resetView() {
+    this.viewScale = 1;
+    this.viewX = 0;
+    this.viewY = 0;
+    this.updateViewTransform();
   }
 
   destroy() {
@@ -810,8 +957,8 @@ function buildVizBody(data) {
 
 function buildVizModeToggle() {
   const modes = [
-    { key: "simulation", label: "Simulation" },
-    { key: "real", label: "Real datasets" },
+    { key: "simulation", label: "Simulation", caption: "Synthetic", icon: "simulation" },
+    { key: "real", label: "Real datasets", caption: "Biological", icon: "real" },
   ];
 
   return `
@@ -827,7 +974,11 @@ function buildVizModeToggle() {
               aria-selected="${isActive}"
               data-viz-mode="${mode.key}"
             >
-              ${mode.label}
+              <span class="viz-mode-icon">${renderIcon(mode.icon)}</span>
+              <span class="viz-mode-text">
+                <strong>${mode.label}</strong>
+                <small>${mode.caption}</small>
+              </span>
             </button>
           `;
         })
@@ -924,7 +1075,7 @@ function buildSimulationViz() {
       <div class="viz-section-header">
         <div class="viz-title-row">
           <div>
-            <span>Simulation</span>
+            <span class="viz-section-label">Simulation</span>
             <h3 data-simulation-viz-title>${activeData.title}</h3>
             <p>Select one synthetic trajectory for the interactive motion panel.</p>
           </div>
@@ -948,7 +1099,7 @@ function buildRealViz() {
       <div class="viz-section-header">
         <div class="viz-title-row">
           <div>
-            <span>Real datasets</span>
+            <span class="viz-section-label">Real datasets</span>
             <h3 data-real-viz-title>${activeRealData.title}</h3>
             <p>Select one biological system for the same trajectory player.</p>
           </div>

@@ -84,6 +84,24 @@ img {
   max-width: 100%;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.ui-icon {
+  display: block;
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+  flex: 0 0 auto;
+}
+
 .site-header {
   position: sticky;
   top: 12px;
@@ -1192,40 +1210,77 @@ p {
 .viz-mode-toggle {
   display: grid;
   grid-template-columns: repeat(2, max-content);
-  gap: 6px;
+  gap: 8px;
   width: fit-content;
-  padding: 6px;
-  border: 1px solid rgba(63, 111, 216, 0.18);
+  padding: 7px;
+  border: 1px solid rgba(63, 111, 216, 0.22);
   border-radius: 999px;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(234, 241, 255, 0.74)),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(234, 241, 255, 0.82)),
     #fff;
-  box-shadow: 0 12px 30px rgba(28, 55, 84, 0.12);
+  box-shadow:
+    0 16px 34px rgba(28, 55, 84, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
 }
 
 .viz-mode-button {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 10px 17px;
-  border: 1px solid transparent;
+  gap: 10px;
+  min-height: 56px;
+  padding: 8px 18px 8px 10px;
+  border: 1px solid rgba(63, 111, 216, 0.12);
   border-radius: 999px;
   color: var(--accent-deep);
-  background: transparent;
+  background: rgba(255, 255, 255, 0.72);
   cursor: pointer;
   font-size: 0.92rem;
   font-weight: 850;
   line-height: 1;
   white-space: nowrap;
+  box-shadow: 0 7px 16px rgba(28, 55, 84, 0.06);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease,
+    background 160ms ease,
+    color 160ms ease;
 }
 
-.viz-mode-button::before {
-  content: "";
-  width: 8px;
-  height: 8px;
+.viz-mode-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: rgba(63, 111, 216, 0.32);
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--cyan));
+  box-shadow: 0 8px 18px rgba(63, 111, 216, 0.22);
+}
+
+.viz-mode-icon .ui-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.viz-mode-text {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  text-align: left;
+}
+
+.viz-mode-text strong {
+  color: inherit;
+  font-size: 0.92rem;
+  font-weight: 880;
+}
+
+.viz-mode-text small {
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 760;
+  text-transform: uppercase;
 }
 
 .viz-mode-button:hover,
@@ -1236,9 +1291,19 @@ p {
   box-shadow: 0 10px 24px rgba(63, 111, 216, 0.24);
 }
 
-.viz-mode-button:hover::before,
-.viz-mode-button.active::before {
+.viz-mode-button:hover {
+  transform: translateY(-1px);
+}
+
+.viz-mode-button:hover .viz-mode-icon,
+.viz-mode-button.active .viz-mode-icon {
+  color: var(--accent);
   background: rgba(255, 255, 255, 0.92);
+}
+
+.viz-mode-button:hover .viz-mode-text small,
+.viz-mode-button.active .viz-mode-text small {
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .viz-column {
@@ -1293,7 +1358,7 @@ p {
   min-width: 0;
 }
 
-.viz-section-header span {
+.viz-section-label {
   display: inline-flex;
   margin-bottom: 8px;
   padding: 5px 9px;
@@ -1942,12 +2007,38 @@ p {
 .motion-stage {
   display: grid;
   place-items: center;
+  position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
   min-height: 0;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
   background:
     linear-gradient(135deg, rgba(245, 248, 247, 0.64), rgba(234, 241, 255, 0.32)),
     var(--paper-solid);
+}
+
+.motion-stage.is-dragging {
+  cursor: grabbing;
+}
+
+.motion-viewport {
+  --motion-scale: 1;
+  --motion-pan-x: 0px;
+  --motion-pan-y: 0px;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  transform: translate3d(var(--motion-pan-x), var(--motion-pan-y), 0) scale(var(--motion-scale));
+  transform-origin: center;
+  transition: transform 150ms ease;
+  will-change: transform;
+}
+
+.motion-stage.is-dragging .motion-viewport {
+  transition: none;
 }
 
 .motion-stage img {
@@ -1956,11 +2047,40 @@ p {
   max-height: none;
   object-fit: contain;
   background: transparent;
-  transition: transform 220ms ease;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .motion-player:hover .motion-stage img {
-  transform: scale(1.006);
+  transform: none;
+}
+
+.motion-view-hint {
+  position: absolute;
+  left: 10px;
+  bottom: 9px;
+  z-index: 3;
+  padding: 5px 8px;
+  border: 1px solid rgba(63, 111, 216, 0.14);
+  border-radius: 999px;
+  color: var(--accent-deep);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 6px 16px rgba(28, 55, 84, 0.08);
+  font-size: 0.66rem;
+  font-weight: 760;
+  opacity: 0;
+  transform: translateY(3px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+  pointer-events: none;
+}
+
+.motion-stage:hover .motion-view-hint,
+.motion-player.is-zoomed .motion-view-hint {
+  opacity: 0.92;
+  transform: translateY(0);
 }
 
 .celltype-panel {
@@ -2070,8 +2190,8 @@ p {
 
 .motion-controls {
   display: grid;
-  grid-template-columns: auto minmax(120px, 1fr) auto;
-  gap: 10px;
+  grid-template-columns: auto minmax(120px, 1fr) auto auto;
+  gap: 8px;
   align-items: center;
   padding: 12px 13px;
   border-top: 1px solid var(--line);
@@ -2110,6 +2230,25 @@ p {
 
 .motion-control:hover {
   transform: translateY(-1px);
+}
+
+.motion-icon-button {
+  min-width: 38px;
+  width: 38px;
+  padding: 0;
+}
+
+.motion-icon-button .ui-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.motion-play .ui-icon {
+  transform: translateX(1px);
+}
+
+.motion-player.is-playing .motion-play .ui-icon {
+  transform: none;
 }
 
 .motion-player.is-playing .motion-play {
@@ -2471,9 +2610,23 @@ p {
 
   .viz-mode-button {
     justify-content: center;
-    min-height: 42px;
-    padding-inline: 10px;
+    min-height: 52px;
+    padding: 7px 9px;
     font-size: 0.84rem;
+  }
+
+  .viz-mode-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .viz-mode-icon .ui-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .viz-mode-text small {
+    font-size: 0.6rem;
   }
 
   .result-panel {
@@ -2485,16 +2638,19 @@ p {
   }
 
   .motion-controls {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: auto auto auto;
+    justify-content: start;
   }
 
   .motion-range {
     grid-column: 1 / -1;
     grid-row: 1;
+    min-width: min(72vw, 320px);
   }
 
   .motion-play,
-  .motion-speed {
+  .motion-speed,
+  .motion-reset {
     grid-row: 2;
   }
 
