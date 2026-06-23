@@ -575,6 +575,7 @@ p {
 }
 
 .atlas-feature {
+  position: relative;
   display: grid;
   min-width: 0;
   overflow: hidden;
@@ -598,7 +599,8 @@ p {
 }
 
 .atlas-feature:hover {
-  transform: translateY(-3px);
+  z-index: 3;
+  transform: translateY(-3px) scale(1.022);
 }
 
 .atlas-feature-media {
@@ -624,7 +626,6 @@ p {
 
 .atlas-feature:hover .atlas-feature-media img {
   filter: saturate(1.04) contrast(1.02);
-  transform: scale(1.035);
 }
 
 .atlas-strip {
@@ -640,6 +641,7 @@ p {
 }
 
 .atlas-card {
+  position: relative;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   min-width: 0;
@@ -658,9 +660,10 @@ p {
 
 .atlas-card:hover,
 .atlas-card.active {
+  z-index: 3;
   border-color: rgba(63, 111, 216, 0.3);
   box-shadow: 0 16px 42px rgba(28, 55, 84, 0.14);
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.025);
 }
 
 .atlas-card.active .atlas-copy {
@@ -688,7 +691,6 @@ p {
 
 .atlas-card:hover .atlas-media img {
   filter: saturate(1.04) contrast(1.02);
-  transform: scale(1.035);
 }
 
 .atlas-copy {
@@ -789,6 +791,7 @@ p {
 }
 
 .model-figure {
+  position: relative;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -810,14 +813,14 @@ p {
 }
 
 .model-figure:hover {
+  z-index: 3;
   border-color: rgba(63, 111, 216, 0.22);
   box-shadow: 0 20px 52px rgba(28, 55, 84, 0.14);
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.025);
 }
 
 .model-figure:hover img {
   filter: saturate(1.04) contrast(1.02);
-  transform: scale(1.035);
 }
 
 .model-figure figcaption {
@@ -940,6 +943,7 @@ p {
 }
 
 .downstream-card {
+  position: relative;
   overflow: hidden;
   display: grid;
   grid-template-rows: auto minmax(300px, auto) auto;
@@ -959,10 +963,11 @@ p {
 }
 
 .downstream-card:hover {
+  z-index: 3;
   border-color: rgba(63, 111, 216, 0.22);
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 18px 42px rgba(28, 55, 84, 0.12);
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.022);
 }
 
 .downstream-card-title {
@@ -1009,7 +1014,6 @@ p {
 
 .downstream-card:hover .downstream-media img {
   filter: saturate(1.04) contrast(1.02);
-  transform: scale(1.045);
 }
 
 .downstream-card-copy {
@@ -2062,13 +2066,15 @@ p {
 }
 
 .result-preview {
+  position: relative;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--paper-solid);
   transition:
     border-color 180ms ease,
-    box-shadow 180ms ease;
+    box-shadow 180ms ease,
+    transform 220ms ease;
 }
 
 .result-preview img {
@@ -2085,13 +2091,14 @@ p {
 }
 
 .result-preview:hover {
+  z-index: 3;
   border-color: rgba(63, 111, 216, 0.22);
   box-shadow: 0 12px 34px rgba(28, 55, 84, 0.1);
+  transform: scale(1.032);
 }
 
 .result-preview:hover img {
   filter: saturate(1.04) contrast(1.02);
-  transform: scale(1.04);
 }
 
 .motion-header {
