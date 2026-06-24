@@ -113,7 +113,7 @@ window.SpaPOT_FIGURES = {
       "The axolotl brain injury-response dataset is used to show spatial alignment, generated slices, critical scores, EGC-family gene programs, and potential-associated expression trends.",
     legend:
       "Fig. 5: SpaPOT reconstructs axolotl brain injury-response dynamics. a. ARTISTA slices before and after alignment for injured axolotl brain, preserving the 2, 5, 10, 15 and 20 DPI injury stages. b. Observed real slices and generated slices across the injury-response trajectory, with cell-type colors and border styles separating real and generated time points. c. Warning-score curves for reaEGC and VLMC/CMPN-associated responses over DPI. d. Spatial maps of reaEGC and VLMC score changes at selected DPI, localizing the periods highlighted by panel c. e. Cell-count trajectories for EGC, proliferative and vascular-associated states across injury time. f. Differential-expression volcano plot comparing reaEGC and wntEGC. g. Marker-gene dot plot summarizing cell-type identity and expression programs across the selected states. h. Potential-ordered gene-expression curves for selected EGC/EX-associated genes.",
-    preview: "assets/figure5_preview.png",
+    preview: "assets/figure5_preview.png?v=20260624b",
     gif: "assets/gifs/figure5_axolotl.gif",
     frames: { base: "assets/frames/figure5/frame_", count: 181, delayMs: 220, start: 2, end: 20, step: 0.1 },
     pdf: "assets/pdfs/figure5.pdf",
