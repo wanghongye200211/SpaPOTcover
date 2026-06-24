@@ -77,7 +77,7 @@ window.SpaPOT_FIGURES = {
       { label: "Frame step", value: "0.05 embryonic day" },
     ],
     timeLabel: "Embryonic time",
-    timepoints: ["E12.5", "E13.0", "E13.5", "E14.0", "E14.5", "E15.0", "E15.5", "E16.0", "E16.5"],
+    timepoints: ["E12.5", "E13.5", "E14.5", "E15.5", "E16.5"],
   },
   figure4: {
     kicker: "Figure 4",
